@@ -27,13 +27,7 @@ class ProjectController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'max:4096'],
-            'tags' => ['nullable', 'string', 'max:500'],
-        ]);
+        $validated = $request->validate($this->projectRules());
 
         $project = Project::create([
             'title' => $validated['title'],
@@ -55,15 +49,10 @@ class ProjectController extends Controller
 
     public function update(Request $request, Project $project): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['image', 'max:4096'],
+        $validated = $request->validate($this->projectRules([
             'remove_images' => ['nullable', 'array'],
             'remove_images.*' => ['integer', 'exists:project_images,id'],
-            'tags' => ['nullable', 'string', 'max:500'],
-        ]);
+        ]));
 
         $project->update([
             'title' => $validated['title'],
@@ -117,9 +106,17 @@ class ProjectController extends Controller
         return redirect()->route('home')->with('status', 'Project verwijderd.');
     }
 
-    /**
-     * @param  array<int, \Illuminate\Http\UploadedFile>  $images
-     */
+    private function projectRules(array $extra = []): array
+    {
+        return $extra + [
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'images' => ['nullable', 'array'],
+            'images.*' => ['image', 'max:4096'],
+            'tags' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
     private function storeImages(Project $project, array $images): void
     {
         $position = $project->images()->max('position') + 1;

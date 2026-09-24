@@ -26,9 +26,11 @@
             </div>
         @endif
 
-        <div class="form-actions">
-            <a href="{{ route('projects.edit', $project) }}" class="btn btn-primary">Bewerken</a>
-            <a href="{{ route('projects.delete', $project) }}" class="btn btn-outline">Verwijderen</a>
-        </div>
+        @auth
+            <div class="form-actions">
+                <a href="{{ route('projects.edit', $project) }}" class="btn btn-primary">Bewerken</a>
+                <a href="{{ route('projects.delete', $project) }}" class="btn btn-outline">Verwijderen</a>
+            </div>
+        @endauth
     </div>
 </x-base-layout>

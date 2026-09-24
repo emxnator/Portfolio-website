@@ -6,7 +6,20 @@
                 <li><a href="#about">Over mij</a></li>
                 <li><a href="#skills">Vaardigheden</a></li>
                 <li><a href="#projects">Projecten</a></li>
-                <li><a href="#contact">Contact</a></li>
+                @guest
+                    <li><a href="#contact">Contact</a></li>
+                @endguest
+                @auth
+                    <li><a href="{{ route('messages.index') }}">Berichten</a></li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="nav-link-button">Uitloggen</button>
+                        </form>
+                    </li>
+                @else
+                    <li><a href="{{ route('login') }}">Inloggen</a></li>
+                @endauth
             </ul>
         </nav>
     </header>
@@ -68,26 +81,64 @@
                             @endforeach
                         </div>
                     @endif
-                    <div class="project-card-actions">
-                        <a href="{{ route('projects.edit', $project) }}" class="btn btn-outline">Bewerken</a>
-                        <a href="{{ route('projects.delete', $project) }}" class="btn btn-outline">Verwijderen</a>
-                    </div>
+                    @auth
+                        <div class="project-card-actions">
+                            <a href="{{ route('projects.edit', $project) }}" class="btn btn-outline">Bewerken</a>
+                            <a href="{{ route('projects.delete', $project) }}" class="btn btn-outline">Verwijderen</a>
+                        </div>
+                    @endauth
                 </div>
             @empty
                 <p class="section-text">Geen projecten gevonden voor deze tag.</p>
             @endforelse
         </div>
-        <div class="hero-actions">
-            <a href="{{ route('projects.create') }}" class="btn btn-primary">Nieuw project</a>
-        </div>
+        @auth
+            <div class="hero-actions">
+                <a href="{{ route('projects.create') }}" class="btn btn-primary">Nieuw project</a>
+            </div>
+        @endauth
     </section>
 
+    @guest
     <section id="contact" class="contact-section">
         <div class="container contact-content">
             <h2>Neem contact op</h2>
-            <a href="mailto:example@example.com" class="btn btn-light">example@example.com</a>
+            <p>Wil je me uitnodigen voor een sollicitatiegesprek of meer informatie opvragen? Stuur een bericht via het formulier.</p>
+
+            <form method="POST" action="{{ route('contact.store') }}" class="contact-form">
+                @csrf
+
+                <div class="form-group">
+                    <label for="contact-name">Naam</label>
+                    <input type="text" id="contact-name" name="name" value="{{ old('name') }}" required>
+                    @error('name')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-email">E-mailadres</label>
+                    <input type="email" id="contact-email" name="email" value="{{ old('email') }}" required>
+                    @error('email')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="contact-message">Bericht</label>
+                    <textarea id="contact-message" name="message" required>{{ old('message') }}</textarea>
+                    @error('message')
+                        <p class="form-error">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-light">Versturen</button>
+                </div>
+            </form>
         </div>
     </section>
+    @endguest
 
     <footer class="site-footer">
         <div class="container">
